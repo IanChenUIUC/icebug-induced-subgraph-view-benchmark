@@ -1,0 +1,23 @@
+[project]
+name = "ian-fork"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "icebug",
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+    "pyarrow==25.0.0",
+]
+
+[tool.uv]
+build-constraint-dependencies = ["cython<3.3"]
+
+[tool.uv.workspace]
+members = [
+    "github.com/IanChenUIUC/icebug",
+]
+
+[tool.uv.sources]
+icebug = { git = "https://github.com/IanChenUIUC/icebug", rev = "05ba024ea1f75d41e2d1026d02eebd5a09023c98" }

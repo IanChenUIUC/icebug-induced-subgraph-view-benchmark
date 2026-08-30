@@ -1,0 +1,20 @@
+[project]
+name = "ian-fork"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "icebug",
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+    "pyarrow==25.0.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "github.com/IanChenUIUC/icebug",
+]
+
+[tool.uv.sources]
+icebug = { git = "https://github.com/Ladybug-Memory/icebug", rev = "b33bb76b2f0fc4a0bfeba01a540879a75019b6ca" }
