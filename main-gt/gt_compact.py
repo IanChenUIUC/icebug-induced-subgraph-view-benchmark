@@ -7,6 +7,8 @@ import pyarrow.parquet as pq
 
 import networkit as nk
 
+import mem
+
 
 def _read(col):
     return pq.read_table(f"../input/livejournal.{col}.parquet")[col].combine_chunks()
@@ -35,9 +37,11 @@ def main():
     ## track the time for creating each View
     create_times = []
     decomp_times = []
+    peak_mbs = []
 
     for size in sizes:
         print(f"creating subgraph view of size {size}")
+        mem.reset_peak()
         start = time.perf_counter()
         subg = nk.graphtools.subgraphFromNodes(graph, nodes[:size], compact=True)
         end = time.perf_counter()
@@ -49,11 +53,14 @@ def main():
         nk.centrality.CoreDecomposition(subg).run()
         end = time.perf_counter()
         decomp_times.append(end - start)
+        peak_mbs.append(mem.peak_mb())
 
-    columns = ["size", "create_time", "decomp_time"]
+    columns = ["size", "create_time", "decomp_time", "peak_mb"]
     data = []
-    for size, create_time, decomp_time in zip(sizes, create_times, decomp_times):
-        data.append([size, create_time, decomp_time])
+    for size, create_time, decomp_time, peak_mb in zip(
+        sizes, create_times, decomp_times, peak_mbs
+    ):
+        data.append([size, create_time, decomp_time, peak_mb])
 
     df = pd.DataFrame(data, columns=columns)
     df.to_csv("timing_gt_compact.csv", index=None)
