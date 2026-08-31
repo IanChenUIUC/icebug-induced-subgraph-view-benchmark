@@ -37,34 +37,36 @@ def main():
     ## track the time for creating each View
     create_times = []
     decomp_times = []
-    peak_mbs = []
+    peak_deltas = []
+
+    baseline_mb = mem.rss_mb()
+    print(f"baseline_mb {baseline_mb:.1f}")
 
     for size in sizes:
         print(f"creating subgraph view of size {size}")
         mem.reset_peak()
         start = time.perf_counter()
-        subg = nk.graph.InducedSubgraphView(graph)
-        subg.addNodes(nodes[:size])
+        subg = nk.graphtools.subgraphFromNodes(graph, nodes[:size], compact=True)
         end = time.perf_counter()
         create_times.append(end - start)
-        print(f"created subgraph view of n={size} m={subg.asGraph().numberOfEdges()}")
+        print(f"created subgraph view of n={size} m={subg.numberOfEdges()}")
 
         print("running core decomp on subgraph view")
         start = time.perf_counter()
-        nk.centrality.CoreDecomposition(subg.asGraph()).run()
+        nk.centrality.CoreDecomposition(subg).run()
         end = time.perf_counter()
         decomp_times.append(end - start)
-        peak_mbs.append(mem.peak_mb())
+        peak_deltas.append(mem.peak_mb() - baseline_mb)
 
-    columns = ["size", "create_time", "decomp_time", "peak_mb"]
+    columns = ["size", "create_time", "decomp_time", "peak_delta_mb"]
     data = []
-    for size, create_time, decomp_time, peak_mb in zip(
-        sizes, create_times, decomp_times, peak_mbs
+    for size, create_time, decomp_time, peak_delta_mb in zip(
+        sizes, create_times, decomp_times, peak_deltas
     ):
-        data.append([size, create_time, decomp_time, peak_mb])
+        data.append([size, create_time, decomp_time, peak_delta_mb])
 
     df = pd.DataFrame(data, columns=columns)
-    df.to_csv("timing_view.csv", index=None)
+    df.to_csv("timing_gt_compact.csv", index=None)
 
 
 if __name__ == "__main__":

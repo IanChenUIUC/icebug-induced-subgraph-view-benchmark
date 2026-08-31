@@ -4,8 +4,16 @@ def reset_peak():
         f.write("5")
 
 
-def peak_mb():
+def _status_mb(field):
     with open("/proc/self/status") as f:
         for line in f:
-            if line.startswith("VmHWM:"):
+            if line.startswith(field):
                 return int(line.split()[1]) / 1024
+
+
+def peak_mb():
+    return _status_mb("VmHWM:")
+
+
+def rss_mb():
+    return _status_mb("VmRSS:")
